@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 fun RegistrationText(modifier: Modifier = Modifier) {
     var userName by remember { mutableStateOf("") }
     var userLastName by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("Man") }
     Column(
         modifier = modifier.fillMaxWidth()
     ) { Text(
@@ -74,6 +75,35 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = gender == "Man",
+                            onClick = { gender = "Man" },
+                        )
+                        Text(
+                            text = "Man",
+                            color = Color(0xFFFDFDFD),
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = gender == "Woman",
+                            onClick = { gender = "Woman" },
+                        )
+                        Text(
+                            text = "Woman",
+                            color = Color(0xFFFDFDFD),
+                        )
+                    }
+                }
             }
         }
     }
