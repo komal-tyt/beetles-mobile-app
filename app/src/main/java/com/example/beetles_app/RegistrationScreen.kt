@@ -2,24 +2,32 @@ package com.example.beetles_app
 
 import android.R
 import android.R.attr.top
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 
 @Composable
 fun RegistrationText(modifier: Modifier = Modifier) {
@@ -43,6 +56,9 @@ fun RegistrationText(modifier: Modifier = Modifier) {
     var selected_course by remember { mutableStateOf("Nothing") }
     var expanded by remember { mutableStateOf(false) }
     var difficulty by remember { mutableStateOf(1f) }
+    var date_of_birth by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
     val courses = listOf("1", "2", "3", "4")
     Column(
         modifier = modifier.fillMaxWidth()
@@ -63,7 +79,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
             shape = RoundedCornerShape(30.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 25.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 25.dp, bottom = 25.dp)
             ) {
                 TextField(
                     value = userName,
@@ -134,9 +150,9 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                 }
                 Text(
                     text = "Select the game difficulty",
-                    color = Color(0xFFFDFDFD),
+                    color = Color(0xFF9BB0C4),
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 5.dp, top = 25.dp),
+                    modifier = Modifier.padding(start = 25.dp, top = 25.dp),
                 )
                 Slider(
                     value = difficulty,
@@ -151,6 +167,38 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                     Text(text = "Easy", color = Color(0xFF9BB0C4), fontSize = 12.sp)
                     Text(text = difficulty.toString(), color = Color(0xFFFDFDFD))
                     Text(text = "Hard", color = Color(0xFF9BB0C4), fontSize = 12.sp)
+                }
+                Text(
+                    text = "Date of birth",
+                    color = Color(0xFF9BB0C4),
+                    modifier = Modifier.padding(start = 25.dp, top = 25.dp),
+                    fontSize = 14.sp
+                )
+                Button(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
+                ) {
+                    Text(if (date_of_birth.isEmpty()) "Select the date" else date_of_birth)
+                }
+                if (showDatePicker) {
+                    val datePickerState = rememberDatePickerState()
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let {
+                                    val format = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                                    date_of_birth = format.format(Date(it))
+                                }
+                                showDatePicker = false
+                            }) { Text("OK") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
                 }
             }
         }
