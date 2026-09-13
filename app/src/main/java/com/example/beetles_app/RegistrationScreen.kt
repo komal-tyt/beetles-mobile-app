@@ -3,6 +3,7 @@ package com.example.beetles_app
 import android.R
 import android.R.attr.top
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,9 @@ fun RegistrationText(modifier: Modifier = Modifier) {
     var userName by remember { mutableStateOf("") }
     var userLastName by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Man") }
+    var selected_course by remember { mutableStateOf("Nothing") }
+    var expanded by remember { mutableStateOf(false) }
+    val courses = listOf("1", "2", "3", "4")
     Column(
         modifier = modifier.fillMaxWidth()
     ) { Text(
@@ -102,6 +106,29 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                             text = "Woman",
                             color = Color(0xFFFDFDFD),
                         )
+                    }
+                }
+                Box{
+                    Button(
+                        onClick = { expanded = true },
+                        modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
+                    ) {
+                        Text("Choice the course")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        courses.forEach { course ->
+                            DropdownMenuItem(
+                                text = { Text(course) },
+                                onClick = {
+                                    selected_course = course
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
