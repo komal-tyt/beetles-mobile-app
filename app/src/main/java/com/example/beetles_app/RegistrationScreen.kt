@@ -42,6 +42,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
     var gender by remember { mutableStateOf("Man") }
     var selected_course by remember { mutableStateOf("Nothing") }
     var expanded by remember { mutableStateOf(false) }
+    var difficulty by remember { mutableStateOf(1f) }
     val courses = listOf("1", "2", "3", "4")
     Column(
         modifier = modifier.fillMaxWidth()
@@ -130,6 +131,26 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                             )
                         }
                     }
+                }
+                Text(
+                    text = "Select the game difficulty",
+                    color = Color(0xFFFDFDFD),
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(start = 5.dp, top = 25.dp),
+                )
+                Slider(
+                    value = difficulty,
+                    onValueChange = { difficulty = it.toInt().toFloat() },
+                    valueRange = 1f..10f,
+                    steps = 8,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Easy", color = Color(0xFF9BB0C4), fontSize = 12.sp)
+                    Text(text = difficulty.toString(), color = Color(0xFFFDFDFD))
+                    Text(text = "Hard", color = Color(0xFF9BB0C4), fontSize = 12.sp)
                 }
             }
         }
