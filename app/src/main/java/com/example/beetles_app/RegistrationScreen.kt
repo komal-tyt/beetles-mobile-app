@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -47,30 +49,37 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 
 @Composable
 fun RegistrationText(modifier: Modifier = Modifier) {
     var userName by remember { mutableStateOf("") }
     var userLastName by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Man") }
-    var selected_course by remember { mutableStateOf("Nothing") }
+    var selectedCourse by remember { mutableStateOf("Nothing") }
     var expanded by remember { mutableStateOf(false) }
     var difficulty by remember { mutableStateOf(1f) }
-    var date_of_birth by remember { mutableStateOf("") }
+    var dateOfBirth by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+    var savedUser by remember { mutableStateOf<UserData?>(null) }
     val courses = listOf("1", "2", "3", "4")
+
     Column(
         modifier = modifier.fillMaxWidth()
-    ) { Text(
-        text = "Registration user",
-        fontSize = 25.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Serif,
-        color = Color(0xFFFDFDFD),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(
+            text = "Registration user",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif,
+            color = Color(0xFFFDFDFD),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
         Card(
             modifier = Modifier.fillMaxWidth().padding(25.dp),
             colors = CardDefaults.cardColors(
@@ -83,7 +92,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
             ) {
                 TextField(
                     value = userName,
-                    onValueChange = { newText -> userName = newText},
+                    onValueChange = { newText -> userName = newText },
                     label = { Text("Input the name") },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
@@ -91,41 +100,33 @@ fun RegistrationText(modifier: Modifier = Modifier) {
 
                 TextField(
                     value = userLastName,
-                    onValueChange = { newText -> userLastName = newText},
+                    onValueChange = { newText -> userLastName = newText },
                     label = { Text("Input the last name") },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
                 )
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = gender == "Man",
                             onClick = { gender = "Man" },
                         )
-                        Text(
-                            text = "Man",
-                            color = Color(0xFFFDFDFD),
-                        )
+                        Text(text = "Man", color = Color(0xFFFDFDFD))
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = gender == "Woman",
                             onClick = { gender = "Woman" },
                         )
-                        Text(
-                            text = "Woman",
-                            color = Color(0xFFFDFDFD),
-                        )
+                        Text(text = "Woman", color = Color(0xFFFDFDFD))
                     }
                 }
-                Box{
+
+                Box {
                     Button(
                         onClick = { expanded = true },
                         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
@@ -135,19 +136,19 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        shape = RoundedCornerShape(14.dp),
                     ) {
                         courses.forEach { course ->
                             DropdownMenuItem(
                                 text = { Text(course) },
                                 onClick = {
-                                    selected_course = course
+                                    selectedCourse = course
                                     expanded = false
                                 }
                             )
                         }
                     }
                 }
+
                 Text(
                     text = "Select the game difficulty",
                     color = Color(0xFF9BB0C4),
@@ -168,6 +169,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                     Text(text = difficulty.toString(), color = Color(0xFFFDFDFD))
                     Text(text = "Hard", color = Color(0xFF9BB0C4), fontSize = 12.sp)
                 }
+
                 Text(
                     text = "Date of birth",
                     color = Color(0xFF9BB0C4),
@@ -178,8 +180,9 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                     onClick = { showDatePicker = true },
                     modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
                 ) {
-                    Text(if (date_of_birth.isEmpty()) "Select the date" else date_of_birth)
+                    Text(if (dateOfBirth.isEmpty()) "Select the date" else dateOfBirth)
                 }
+
                 if (showDatePicker) {
                     val datePickerState = rememberDatePickerState()
                     DatePickerDialog(
@@ -188,7 +191,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                             TextButton(onClick = {
                                 datePickerState.selectedDateMillis?.let {
                                     val format = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-                                    date_of_birth = format.format(Date(it))
+                                    dateOfBirth = format.format(Date(it))
                                 }
                                 showDatePicker = false
                             }) { Text("OK") }
@@ -200,9 +203,47 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                         DatePicker(state = datePickerState)
                     }
                 }
+                Button(
+                    onClick = {
+                        savedUser = UserData(
+                            firstName = userName,
+                            lastName = userLastName,
+                            gender = gender,
+                            course = selectedCourse,
+                            difficulty = difficulty,
+                            dateOfBirth = dateOfBirth,
+                            zodiacSign = getZodiacSign(dateOfBirth)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp, top = 25.dp)
+                ) {
+                    Text("Save")
+                }
+
+                // ===== OUTPUT =====
+                savedUser?.let { user ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(25.dp)
+                    ) {
+                        Text(text = "First name: ${user.firstName}", color = Color(0xFFFDFDFD))
+                        Text(text = "Last name: ${user.lastName}", color = Color(0xFFFDFDFD))
+                        Text(text = "Gender: ${user.gender}", color = Color(0xFFFDFDFD))
+                        Text(text = "Course: ${user.course}", color = Color(0xFFFDFDFD))
+                        Text(text = "Difficulty: ${user.difficulty}", color = Color(0xFFFDFDFD))
+                        Text(text = "Date of birth: ${user.dateOfBirth}", color = Color(0xFFFDFDFD))
+                        Text(
+                            text = "Zodiac sign: ${user.zodiacSign}",
+                            color = Color(0xFFFDFDFD),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
 }
-
-
