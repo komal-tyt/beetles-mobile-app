@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                         Column(
                             modifier = Modifier.fillMaxSize().padding(innerPadding)
                         ) {
-                            RegistrationText(
+                            RegistrationScreen(
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
