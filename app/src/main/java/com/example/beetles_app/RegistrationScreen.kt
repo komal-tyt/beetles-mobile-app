@@ -221,8 +221,7 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                 ) {
                     Text("Save")
                 }
-
-                // ===== OUTPUT =====
+                
                 savedUser?.let { user ->
                     Column(
                         modifier = Modifier
@@ -235,12 +234,21 @@ fun RegistrationText(modifier: Modifier = Modifier) {
                         Text(text = "Course: ${user.course}", color = Color(0xFFFDFDFD))
                         Text(text = "Difficulty: ${user.difficulty}", color = Color(0xFFFDFDFD))
                         Text(text = "Date of birth: ${user.dateOfBirth}", color = Color(0xFFFDFDFD))
-                        Text(
-                            text = "Zodiac sign: ${user.zodiacSign}",
-                            color = Color(0xFFFDFDFD),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = getZodiacSymbol(user.zodiacSign),
+                                fontSize = 40.sp,
+                                color = Color(0xFFFDFDFD)
+                            )
+                            Text(
+                                text = "  Zodiac sign: ${user.zodiacSign}",
+                                color = Color(0xFFFDFDFD),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

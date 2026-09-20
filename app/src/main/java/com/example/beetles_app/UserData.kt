@@ -34,3 +34,21 @@ fun getZodiacSign(date: String): String {
         "Unknown"
     }
 }
+
+fun getZodiacSymbol(sign: String): String {
+    return when (sign) {
+        "Aries" -> "♈"
+        "Taurus" -> "♉"
+        "Gemini" -> "♊"
+        "Cancer" -> "♋"
+        "Leo" -> "♌"
+        "Virgo" -> "♍"
+        "Libra" -> "♎"
+        "Scorpio" -> "♏"
+        "Sagittarius" -> "♐"
+        "Capricorn" -> "♑"
+        "Aquarius" -> "♒"
+        "Pisces" -> "♓"
+        else -> "?"
+    }
+}
