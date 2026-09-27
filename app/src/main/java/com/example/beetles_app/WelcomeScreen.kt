@@ -75,6 +75,7 @@ fun WelcomeScreen(
         ) {
             when (selectedTab) {
                 0 -> RegistrationScreen()
+                2 -> RulesScreen()
             }
         }
     }
