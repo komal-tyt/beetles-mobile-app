@@ -170,7 +170,7 @@ fun RegistrationScreen(
                         state = datePickerState,
                         modifier = Modifier.scale(0.8f),
                         colors = DatePickerDefaults.colors(
-                            containerColor = Color.Transparent,
+                            containerColor = Color(0xFFD6E4F0),
                             todayContentColor = Color(0xFF9BB0C4)
                         )
                     )
