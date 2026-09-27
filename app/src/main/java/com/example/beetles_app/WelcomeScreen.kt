@@ -66,7 +66,7 @@ fun WelcomeScreen(
                 Tab(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
-                    text = { Text(title) }
+                    text = { Text(title, fontSize = 20.sp) }
                 )
             }
         }

@@ -57,7 +57,7 @@ fun RegistrationScreen(
             fontFamily = FontFamily.Serif,
             color = Color(0xFFFDFDFD),
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(top = 25.dp)
         )
 
         Card(
