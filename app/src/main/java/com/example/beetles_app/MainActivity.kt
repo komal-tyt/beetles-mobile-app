@@ -27,13 +27,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = Color(0xFF25344a)
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(innerPadding)
-                        ) {
-                            RegistrationScreen(
-                                modifier = Modifier.padding(innerPadding)
-                            )
-                        }
+                        WelcomeScreen()
                     }
                 }
             }
