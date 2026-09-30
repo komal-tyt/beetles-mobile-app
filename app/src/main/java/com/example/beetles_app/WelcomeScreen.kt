@@ -77,7 +77,7 @@ fun WelcomeScreen(
                 0 -> RegistrationScreen()
                 1 -> SettingsScreen()
                 2 -> RulesScreen()
-                //3 -> AuthorsScreen()
+                3 -> AuthorsScreen()
             }
         }
     }
