@@ -23,57 +23,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun WelcomeScreen(
-    modifier: Modifier = Modifier
-){
+fun WelcomeScreen(modifier: Modifier = Modifier) {
     val tabs = listOf("Sign up", "Settings", "Rules", "Authors")
-    var selectedTab by remember { mutableStateOf(10) }
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val scope = rememberCoroutineScope()
 
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Beetles",
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif,
-            color = Color(0xFFFDFDFD),
-            textAlign = TextAlign.Center
-        )
-
-        Text(
-            text = "apocalypse",
-            fontSize = 18.sp,
-            color = Color(0xFF9BB0C4),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 3.dp)
-        )
-    }
-    Column(
-        modifier = modifier.fillMaxSize(),
-    ) {
+    Column(modifier = modifier.fillMaxSize()) {
         TabRow(
-            selectedTabIndex = selectedTab,
+            selectedTabIndex = pagerState.currentPage,
             containerColor = Color.Transparent,
             contentColor = Color(0xFF9BB0C4),
             modifier = Modifier.padding(top = 50.dp)
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
                     text = { Text(title, fontSize = 20.sp) }
                 )
             }
         }
-        Box(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier.weight(1f).fillMaxWidth()
-        ) {
-            when (selectedTab) {
+        ) { page ->
+            when (page) {
                 0 -> RegistrationScreen()
                 1 -> SettingsScreen()
                 2 -> RulesScreen()
