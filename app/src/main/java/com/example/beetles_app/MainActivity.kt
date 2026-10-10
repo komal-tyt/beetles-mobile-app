@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         var showGame by remember { mutableStateOf(false) }
                         if (showGame) {
-                            GameScreen()
+                            GameScreen(onExit = { showGame = false })
                         } else {
                             WelcomeScreen(onPlay = { showGame = true })
                         }

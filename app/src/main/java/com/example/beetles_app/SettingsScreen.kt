@@ -18,11 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SettingsScreen(
-    modifier: Modifier = Modifier,
-    logic: SettingsLogic = remember { SettingsLogic() }
-) {
-    val s = logic.state
+fun SettingsScreen(modifier: Modifier = Modifier) {
+    val s = SettingsLogic.state
 
     Column(
         modifier = modifier
@@ -38,7 +35,7 @@ fun SettingsScreen(
                 SettingItem("Game speed", s.speed.toString()) {
                     Slider(
                         value = s.speed,
-                        onValueChange = logic::onSpeedChange,
+                        onValueChange = SettingsLogic::onSpeedChange,
                         valueRange = 0.5f..3f,
                         steps = 4
                     )
@@ -46,7 +43,7 @@ fun SettingsScreen(
                 SettingItem("Max. beetles", s.maxCockroaches.toString()) {
                     Slider(
                         value = s.maxCockroaches.toFloat(),
-                        onValueChange = { logic.onCockroachesChange(it.toInt()) },
+                        onValueChange = { SettingsLogic.onCockroachesChange(it.toInt()) },
                         valueRange = 1f..20f,
                         steps = 18
                     )
@@ -54,7 +51,7 @@ fun SettingsScreen(
                 SettingItem("Bonus interval (sec)", s.bonusInterval.toString()) {
                     Slider(
                         value = s.bonusInterval.toFloat(),
-                        onValueChange = { logic.onBonusIntervalChange(it.toInt()) },
+                        onValueChange = { SettingsLogic.onBonusIntervalChange(it.toInt()) },
                         valueRange = 5f..60f,
                         steps = 10
                     )
@@ -62,7 +59,7 @@ fun SettingsScreen(
                 SettingItem("Round duration (sec)", s.roundDuration.toString()) {
                     Slider(
                         value = s.roundDuration.toFloat(),
-                        onValueChange = { logic.onRoundDurationChange(it.toInt()) },
+                        onValueChange = { SettingsLogic.onRoundDurationChange(it.toInt()) },
                         valueRange = 30f..180f,
                         steps = 14
                     )
