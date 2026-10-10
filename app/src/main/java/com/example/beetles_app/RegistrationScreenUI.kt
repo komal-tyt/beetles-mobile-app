@@ -184,7 +184,14 @@ fun RegistrationScreen(
                     )
                 }
                 Button(
-                    onClick = RegistrationScreenLogic::save,
+                    onClick = {
+                        if (RegistrationScreenLogic.isFormFilled()) {
+                            RegistrationScreenLogic.save()
+                            showError = false
+                        } else {
+                            showError = true
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 25.dp)
                 ) {
                     Text("Save")
@@ -220,13 +227,11 @@ fun RegistrationScreen(
                 }
                 if (showError) {
                     Text(
-                        text = "Register first!",
+                        text = "Fill all fields!",
                         color = Color(0xFFFF6B6B),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
                     )
                 }
                 Button(

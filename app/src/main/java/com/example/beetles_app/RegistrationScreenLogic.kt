@@ -44,4 +44,12 @@ object  RegistrationScreenLogic {
     fun canPlay(): Boolean {
         return savedUser != null
     }
+
+    fun isFormFilled(): Boolean {
+        return state.firstName.isNotBlank() &&
+                state.lastName.isNotBlank() &&
+                state.gender.isNotBlank() &&
+                state.course.isNotBlank() &&
+                state.dateOfBirth.isNotBlank()
+    }
 }
