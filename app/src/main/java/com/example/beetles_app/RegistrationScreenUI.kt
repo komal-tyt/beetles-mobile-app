@@ -43,10 +43,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun RegistrationScreen(
     modifier: Modifier = Modifier,
-    onPlay: () -> Unit = {},
-    logic: RegistrationScreenLogic = remember { RegistrationScreenLogic() }
+    onPlay: () -> Unit = {}
 ) {
-    val user = logic.state
+    val user = RegistrationScreenLogic.state
     val courses = listOf("1", "2", "3", "4")
     var showError by remember { mutableStateOf(false) }
     LaunchedEffect(showError) {
@@ -79,7 +78,7 @@ fun RegistrationScreen(
             ) {
                 TextField(
                     value = user.firstName,
-                    onValueChange = logic::onFirstNameChange,
+                    onValueChange = RegistrationScreenLogic::onFirstNameChange,
                     label = { Text("Input the name") },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
@@ -87,7 +86,7 @@ fun RegistrationScreen(
 
                 TextField(
                     value = user.lastName,
-                    onValueChange = logic::onLastNameChange,
+                    onValueChange = RegistrationScreenLogic::onLastNameChange,
                     label = { Text("Input the last name") },
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
@@ -101,14 +100,14 @@ fun RegistrationScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = user.gender == "Man",
-                            onClick = { logic.onGenderChange("Man") },
+                            onClick = { RegistrationScreenLogic.onGenderChange("Man") },
                         )
                         Text(text = "Man", color = Color(0xFFFDFDFD))
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = user.gender == "Woman",
-                            onClick = { logic.onGenderChange("Woman") },
+                            onClick = { RegistrationScreenLogic.onGenderChange("Woman") },
                         )
                         Text(text = "Woman", color = Color(0xFFFDFDFD))
                     }
@@ -116,19 +115,19 @@ fun RegistrationScreen(
 
                 Box {
                     Button(
-                        onClick = logic::openCourseMenu,
+                        onClick = RegistrationScreenLogic::openCourseMenu,
                         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
                     ) {
                         Text("Choice the course")
                     }
                     DropdownMenu(
-                        expanded = logic.courseMenuExpanded,
-                        onDismissRequest = logic::closeCourseMenu,
+                        expanded = RegistrationScreenLogic.courseMenuExpanded,
+                        onDismissRequest = RegistrationScreenLogic::closeCourseMenu,
                     ) {
                         courses.forEach { course ->
                             DropdownMenuItem(
                                 text = { Text(course) },
-                                onClick = { logic.onCourseChange(course) }
+                                onClick = { RegistrationScreenLogic.onCourseChange(course) }
                             )
                         }
                     }
@@ -142,7 +141,7 @@ fun RegistrationScreen(
                 )
                 Slider(
                     value = user.difficulty,
-                    onValueChange = { logic.onDifficultyChange(it.toInt().toFloat()) },
+                    onValueChange = { RegistrationScreenLogic.onDifficultyChange(it.toInt().toFloat()) },
                     valueRange = 1f..10f,
                     steps = 8,
                 )
@@ -165,7 +164,7 @@ fun RegistrationScreen(
                 LaunchedEffect(datePickerState.selectedDateMillis) {
                     val millis = datePickerState.selectedDateMillis
                     if (millis != null) {
-                        logic.onDateChange(logic.formatDate(millis))
+                        RegistrationScreenLogic.onDateChange(RegistrationScreenLogic.formatDate(millis))
                     }
                 }
                 Box(
@@ -185,12 +184,12 @@ fun RegistrationScreen(
                     )
                 }
                 Button(
-                    onClick = logic::save,
+                    onClick = RegistrationScreenLogic::save,
                     modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 25.dp)
                 ) {
                     Text("Save")
                 }
-                logic.savedUser?.let { user ->
+                RegistrationScreenLogic.savedUser?.let { user ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -232,7 +231,7 @@ fun RegistrationScreen(
                 }
                 Button(
                     onClick = {
-                        if (logic.canPlay()) {
+                        if (RegistrationScreenLogic.canPlay()) {
                             onPlay()
                         } else {
                             showError = true

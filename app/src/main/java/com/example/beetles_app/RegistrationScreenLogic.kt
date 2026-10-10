@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class RegistrationScreenLogic {
+object  RegistrationScreenLogic {
     var state by mutableStateOf(UserData())
         private set
 
