@@ -33,7 +33,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen(
+    modifier: Modifier = Modifier,
+    onPlay: () -> Unit = {}
+) {
     val tabs = listOf("Sign up", "Settings", "Rules", "Authors")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
@@ -60,7 +63,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f).fillMaxWidth()
         ) { page ->
             when (page) {
-                0 -> RegistrationScreen()
+                0 -> RegistrationScreen(onPlay = onPlay)
                 1 -> SettingsScreen()
                 2 -> RulesScreen()
                 3 -> AuthorsScreen()

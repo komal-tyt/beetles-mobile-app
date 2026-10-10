@@ -40,4 +40,8 @@ class RegistrationScreenLogic {
 
     fun formatDate(millis: Long): String =
         SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(millis))
+
+    fun canPlay(): Boolean {
+        return savedUser != null
+    }
 }
