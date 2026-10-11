@@ -8,9 +8,9 @@ enum class BugType(
     val score: Int,
     val color: Color
 ) {
-    NORMAL(defaultSpeed = 0.005f, defaultSize = 0.05f, score = 1, color = Color(0xFF6B8E23)),
-    FAST(defaultSpeed = 0.01f, defaultSize = 0.03f, score = 2, color = Color(0xFFFFA500)),
-    RARE(defaultSpeed = 0.001f, defaultSize = 0.07f, score = 67, color = Color(0xFF9932CC))
+    NORMAL(defaultSpeed = 0.007f, defaultSize = 0.15f, score = 5, color = Color(0xFF6B8E23)),
+    FAST(defaultSpeed = 0.01f, defaultSize = 0.09f, score = 15, color = Color(0xFFFFA500)),
+    RARE(defaultSpeed = 0.003f, defaultSize = 0.12f, score = 10, color = Color(0xFF9932CC))
 }
 
 data class Bug(

@@ -1,6 +1,8 @@
 package com.example.beetles_app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.random.Random
 
 fun randomBug(id: Long): Bug {
@@ -65,6 +69,9 @@ fun GameScreen(
     var timeLeft by remember { mutableStateOf(roundDuration) }
     var showDialog by remember { mutableStateOf(false) }
     var roundKey by remember { mutableStateOf(0) }
+    var score by remember { mutableStateOf(0) }
+    var hits by remember { mutableStateOf(0) }
+    var misses by remember { mutableStateOf(0) }
 
     val bugs = remember { mutableStateListOf<Bug>() }
 
@@ -72,6 +79,9 @@ fun GameScreen(
         bugs.clear()
         timeLeft = roundDuration
         showDialog = false
+        score = 0
+        hits = 0
+        misses = 0
 
         repeat(maxBeetles) { i ->
             bugs.add(randomBug(i.toLong() + roundKey * 1000L))
@@ -99,10 +109,10 @@ fun GameScreen(
                 val minY = half
                 val maxY = 1f - half
 
-                if (x < minX) { x = minX; vx = kotlin.math.abs(vx) }
-                if (x > maxX) { x = maxX; vx = -kotlin.math.abs(vx) }
-                if (y < minY) { y = minY; vy = kotlin.math.abs(vy) }
-                if (y > maxY) { y = maxY; vy = -kotlin.math.abs(vy) }
+                if (x < minX) { x = minX; vx = abs(vx) }
+                if (x > maxX) { x = maxX; vx = -abs(vx) }
+                if (y < minY) { y = minY; vy = abs(vy) }
+                if (y > maxY) { y = maxY; vy = -abs(vy) }
 
                 bugs[index] = bug.copy(x = x, y = y, vx = vx, vy = vy)
             }
@@ -114,7 +124,16 @@ fun GameScreen(
         val heightPx = constraints.maxHeight.toFloat()
         val density = LocalDensity.current
 
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF25344a))) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF25344a))
+                .pointerInput(roundKey) {
+                    detectTapGestures(onTap = {
+                        misses += 1
+                    })
+                }
+        ) {
             bugs.forEach { bug ->
                 val sizePx = bug.size * widthPx
 
@@ -128,6 +147,12 @@ fun GameScreen(
                             .size(sizePx.toDp())
                             .clip(CircleShape)
                             .background(bug.type.color)
+                            .clickable {
+                                score += bug.type.score
+                                hits += 1
+                                bugs.remove(bug)
+                                bugs.add(randomBug(System.currentTimeMillis() + bug.id))
+                            }
                     )
                 }
             }
@@ -154,16 +179,25 @@ fun GameScreen(
                 )
             }
 
-            Text(
-                text = "Left: $timeLeft sec",
-                fontSize = 20.sp,
-                color = Color(0xFFFDFDFD),
-                fontFamily = FontFamily.Serif,
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 48.dp),
-                textAlign = TextAlign.Center
-            )
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Left: $timeLeft sec",
+                    fontSize = 20.sp,
+                    color = Color(0xFFFDFDFD),
+                    fontFamily = FontFamily.Serif
+                )
+                Text(
+                    text = "Score: $score",
+                    fontSize = 20.sp,
+                    color = Color(0xFFFDFDFD),
+                    fontFamily = FontFamily.Serif
+                )
+            }
         }
     }
 
