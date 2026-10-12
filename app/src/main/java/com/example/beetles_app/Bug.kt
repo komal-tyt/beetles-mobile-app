@@ -6,11 +6,30 @@ enum class BugType(
     val defaultSpeed: Float,
     val defaultSize: Float,
     val score: Int,
-    val color: Color
+    val color: Color,
+    val imageRes: Int
 ) {
-    NORMAL(defaultSpeed = 0.007f, defaultSize = 0.15f, score = 5, color = Color(0xFF6B8E23)),
-    FAST(defaultSpeed = 0.01f, defaultSize = 0.09f, score = 15, color = Color(0xFFFFA500)),
-    RARE(defaultSpeed = 0.003f, defaultSize = 0.12f, score = 10, color = Color(0xFF9932CC))
+    NORMAL(
+        defaultSpeed = 0.007f,
+        defaultSize = 0.15f,
+        score = 5,
+        color = Color(0xFF6B8E23),
+        imageRes = R.drawable.bug_normal
+    ),
+    FAST(
+        defaultSpeed = 0.01f,
+        defaultSize = 0.09f,
+        score = 15,
+        color = Color(0xFFFFA500),
+        imageRes = R.drawable.bug_fast
+    ),
+    RARE(
+        defaultSpeed = 0.003f,
+        defaultSize = 0.12f,
+        score = 10,
+        color = Color(0xFF9932CC),
+        imageRes = R.drawable.bug_rare
+    )
 }
 
 data class Bug(
