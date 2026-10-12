@@ -197,16 +197,31 @@ fun GameScreen(
                     color = Color(0xFFFDFDFD),
                     fontFamily = FontFamily.Serif
                 )
+                Text(
+                    text = "Hits: $hits | Misses: $misses",
+                    fontSize = 14.sp,
+                    color = Color(0xFF9BB0C4)
+                )
             }
         }
     }
 
     if (showDialog) {
+        val accuracy = if (hits + misses > 0) hits * 100 / (hits + misses) else 0
+
         AlertDialog(
             onDismissRequest = { },
             title = {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(text = "Round over", textAlign = TextAlign.Center)
+                }
+            },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "Score: $score", fontSize = 16.sp)
+                    Text(text = "Hits: $hits", fontSize = 16.sp)
+                    Text(text = "Misses: $misses", fontSize = 16.sp)
+                    Text(text = "Accuracy: $accuracy%", fontSize = 16.sp)
                 }
             },
             confirmButton = {

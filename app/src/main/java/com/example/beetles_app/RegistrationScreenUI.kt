@@ -134,27 +134,6 @@ fun RegistrationScreen(
                 }
 
                 Text(
-                    text = "Select the game difficulty",
-                    color = Color(0xFF9BB0C4),
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 25.dp, top = 25.dp),
-                )
-                Slider(
-                    value = user.difficulty,
-                    onValueChange = { RegistrationScreenLogic.onDifficultyChange(it.toInt().toFloat()) },
-                    valueRange = 1f..10f,
-                    steps = 8,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "Easy", color = Color(0xFF9BB0C4), fontSize = 12.sp)
-                    Text(text = user.difficulty.toString(), color = Color(0xFFFDFDFD))
-                    Text(text = "Hard", color = Color(0xFF9BB0C4), fontSize = 12.sp)
-                }
-
-                Text(
                     text = "Date of birth",
                     color = Color(0xFF9BB0C4),
                     modifier = Modifier.padding(start = 25.dp, top = 25.dp),
@@ -206,7 +185,6 @@ fun RegistrationScreen(
                         Text(text = "Last name: ${user.lastName}", color = Color(0xFFFDFDFD))
                         Text(text = "Gender: ${user.gender}", color = Color(0xFFFDFDFD))
                         Text(text = "Course: ${user.course}", color = Color(0xFFFDFDFD))
-                        Text(text = "Difficulty: ${user.difficulty}", color = Color(0xFFFDFDFD))
                         Text(text = "Date of birth: ${user.dateOfBirth}", color = Color(0xFFFDFDFD))
                         Row(
                             verticalAlignment = Alignment.CenterVertically

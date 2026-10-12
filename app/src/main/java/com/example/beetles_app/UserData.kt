@@ -5,7 +5,6 @@ data class UserData(
     val lastName: String = "",
     val gender: String = "",
     val course: String = "",
-    val difficulty: Float = 1f,
     val dateOfBirth: String = "",
     val zodiacSign: String = ""
 )

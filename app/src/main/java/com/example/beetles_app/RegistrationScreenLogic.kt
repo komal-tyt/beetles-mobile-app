@@ -26,7 +26,6 @@ object  RegistrationScreenLogic {
         courseMenuExpanded = false
     }
 
-    fun onDifficultyChange(v: Float) { state = state.copy(difficulty = v) }
     fun onDateChange(v: String) { state = state.copy(dateOfBirth = v) }
 
     fun openCourseMenu()  { courseMenuExpanded = true }
