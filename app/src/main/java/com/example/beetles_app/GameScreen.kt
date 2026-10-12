@@ -1,7 +1,7 @@
 package com.example.beetles_app
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -26,10 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 fun randomBug(id: Long): Bug {
@@ -55,6 +57,23 @@ fun randomBug(id: Long): Bug {
         size = type.defaultSize,
         type = type
     )
+}
+
+fun randomBugAwayFromOthers(existing: List<Bug>, id: Long): Bug {
+    var newBug = randomBug(id)
+    var attempts = 0
+    while (attempts < 20) {
+        val tooClose = existing.any { other ->
+            val dx = other.x - newBug.x
+            val dy = other.y - newBug.y
+            val dist = sqrt(dx * dx + dy * dy)
+            dist < (other.size + newBug.size)
+        }
+        if (!tooClose) break
+        newBug = randomBug(id + attempts)
+        attempts += 1
+    }
+    return newBug
 }
 
 @Composable
@@ -84,7 +103,7 @@ fun GameScreen(
         misses = 0
 
         repeat(maxBeetles) { i ->
-            bugs.add(randomBug(i.toLong() + roundKey * 1000L))
+            bugs.add(randomBugAwayFromOthers(bugs, i.toLong() + roundKey * 1000L))
         }
 
         launch {
@@ -129,8 +148,37 @@ fun GameScreen(
                 .fillMaxSize()
                 .background(Color(0xFF25344a))
                 .pointerInput(roundKey) {
-                    detectTapGestures(onTap = {
-                        misses += 1
+                    detectTapGestures(onTap = { offset ->
+                        var tapped: Bug? = null
+
+                        for (bug in bugs) {
+                            val sizePx = bug.size * widthPx
+                            val centerX = bug.x * widthPx
+                            val centerY = bug.y * heightPx
+                            val radius = sizePx / 2f
+
+                            val dx = offset.x - centerX
+                            val dy = offset.y - centerY
+                            if (dx * dx + dy * dy < radius * radius) {
+                                tapped = bug
+                                break
+                            }
+                        }
+
+                        val target = tapped
+                        if (target != null) {
+                            score += target.type.score
+                            hits += 1
+                            bugs.remove(target)
+                            bugs.add(
+                                randomBugAwayFromOthers(
+                                    bugs,
+                                    System.currentTimeMillis() + target.id
+                                )
+                            )
+                        } else {
+                            misses += 1
+                        }
                     })
                 }
         ) {
@@ -138,21 +186,20 @@ fun GameScreen(
                 val sizePx = bug.size * widthPx
 
                 with(density) {
-                    Box(
+                    val angle = Math.toDegrees(
+                        atan2(bug.vy.toDouble(), bug.vx.toDouble())
+                    ).toFloat() + 90f
+
+                    Image(
+                        painter = painterResource(id = bug.type.imageRes),
+                        contentDescription = bug.type.name,
                         modifier = Modifier
                             .offset(
                                 x = (bug.x * widthPx - sizePx / 2f).toDp(),
                                 y = (bug.y * heightPx - sizePx / 2f).toDp()
                             )
                             .size(sizePx.toDp())
-                            .clip(CircleShape)
-                            .background(bug.type.color)
-                            .clickable {
-                                score += bug.type.score
-                                hits += 1
-                                bugs.remove(bug)
-                                bugs.add(randomBug(System.currentTimeMillis() + bug.id))
-                            }
+                            .rotate(angle)
                     )
                 }
             }
