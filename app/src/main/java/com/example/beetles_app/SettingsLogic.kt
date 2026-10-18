@@ -19,4 +19,8 @@ object SettingsLogic {
     fun onCockroachesChange(v: Int)   { state = state.copy(maxCockroaches = v) }
     fun onBonusIntervalChange(v: Int) { state = state.copy(bonusInterval = v) }
     fun onRoundDurationChange(v: Int) { state = state.copy(roundDuration = v) }
+
+    fun updateSettings(speed: Float, maxCockroaches: Int, bonusInterval: Int, roundDuration: Int) {
+        state = GameSettings(speed, maxCockroaches, bonusInterval, roundDuration)
+    }
 }

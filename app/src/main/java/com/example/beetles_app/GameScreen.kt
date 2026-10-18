@@ -124,21 +124,21 @@ fun GameScreen(
             }
             showDialog = true
 
-            val firstName = RegistrationScreenLogic.savedUser?.firstName ?: "Unknown"
-            val lastName = RegistrationScreenLogic.savedUser?.lastName ?: ""
-            val currentSpeed = SettingsLogic.state.speed
-
-            scope.launch {
-                repository.saveBestScore(
-                    Score(
-                        firstName = firstName,
-                        lastName = lastName,
-                        score = score,
-                        speed = currentSpeed,
-                        hits = hits,
-                        misses = misses
+            val currentUser = RegistrationScreenLogic.selectedUser
+            if (currentUser != null) {
+                val currentSpeed = SettingsLogic.state.speed
+                scope.launch {
+                    repository.saveBestScore(
+                        Score(
+                            firstName = currentUser.firstName,
+                            lastName = currentUser.lastName,
+                            score = score,
+                            speed = currentSpeed,
+                            hits = hits,
+                            misses = misses
+                        )
                     )
-                )
+                }
             }
         }
 

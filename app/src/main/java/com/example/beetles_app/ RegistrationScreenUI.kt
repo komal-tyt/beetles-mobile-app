@@ -1,63 +1,56 @@
 package com.example.beetles_app
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import com.example.beetles_app.data.AppDatabase
+import com.example.beetles_app.data.User
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun RegistrationScreen(
-    modifier: Modifier = Modifier,
-    onPlay: () -> Unit = {}
+    onBack: () -> Unit,
+    onUserCreated: () -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val userDao = remember { AppDatabase.getDatabase(context).userDao() }
+
     val user = RegistrationScreenLogic.state
     val courses = listOf("1", "2", "3", "4")
-    var showError by remember { mutableStateOf(false) }
-    LaunchedEffect(showError) {
-        if (showError) {
-            delay(2000)
-            showError = false
-        }
-    }
 
     Column(
-        modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Button(onClick = {
+                RegistrationScreenLogic.clearForm()
+                onBack()
+            }) {
+                Text("Back")
+            }
+        }
+
         Text(
             text = "Registration user",
             fontSize = 25.sp,
@@ -65,7 +58,7 @@ fun RegistrationScreen(
             fontFamily = FontFamily.Serif,
             color = Color(0xFFFDFDFD),
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 25.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
         )
 
         Card(
@@ -93,8 +86,7 @@ fun RegistrationScreen(
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(start = 25.dp, end = 25.dp, top = 25.dp),
+                    modifier = Modifier.fillMaxWidth().padding(start = 25.dp, end = 25.dp, top = 25.dp),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -118,7 +110,7 @@ fun RegistrationScreen(
                         onClick = RegistrationScreenLogic::openCourseMenu,
                         modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp)
                     ) {
-                        Text("Choice the course")
+                        Text("Choice the course: ${user.course}")
                     }
                     DropdownMenu(
                         expanded = RegistrationScreenLogic.courseMenuExpanded,
@@ -147,11 +139,7 @@ fun RegistrationScreen(
                     }
                 }
                 Box(
-                    modifier = Modifier.padding(start = 15.dp, end= 15.dp, top = 25.dp).clip(RoundedCornerShape(20.dp)).background(Color(
-                        0xFFD6E4F0
-                    )
-                    )
-
+                    modifier = Modifier.padding(start = 15.dp, end= 15.dp, top = 25.dp).clip(RoundedCornerShape(20.dp)).background(Color(0xFFD6E4F0))
                 ){
                     DatePicker(
                         state = datePickerState,
@@ -162,73 +150,53 @@ fun RegistrationScreen(
                         )
                     )
                 }
-                Button(
-                    onClick = {
-                        if (RegistrationScreenLogic.isFormFilled()) {
-                            RegistrationScreenLogic.save()
-                            showError = false
-                        } else {
-                            showError = true
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 25.dp)
-                ) {
-                    Text("Save")
-                }
-                RegistrationScreenLogic.savedUser?.let { user ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(25.dp)
-                    ) {
-                        Text(text = "First name: ${user.firstName}", color = Color(0xFFFDFDFD))
-                        Text(text = "Last name: ${user.lastName}", color = Color(0xFFFDFDFD))
-                        Text(text = "Gender: ${user.gender}", color = Color(0xFFFDFDFD))
-                        Text(text = "Course: ${user.course}", color = Color(0xFFFDFDFD))
-                        Text(text = "Date of birth: ${user.dateOfBirth}", color = Color(0xFFFDFDFD))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = getZodiacSymbol(user.zodiacSign),
-                                fontSize = 40.sp,
-                                color = Color(0xFFFDFDFD)
-                            )
-                            Text(
-                                text = "  Zodiac sign: ${user.zodiacSign}",
-                                color = Color(0xFFFDFDFD),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-                if (showError) {
+
+                RegistrationScreenLogic.errorMessage?.let { error ->
                     Text(
-                        text = "Fill all fields!",
+                        text = error,
                         color = Color(0xFFFF6B6B),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
                     )
                 }
+
                 Button(
                     onClick = {
-                        if (RegistrationScreenLogic.canPlay()) {
-                            onPlay()
+                        if (RegistrationScreenLogic.isFormFilled()) {
+                            scope.launch {
+                                val existing = userDao.findUser(user.firstName, user.lastName, user.dateOfBirth)
+                                if (existing != null) {
+                                    RegistrationScreenLogic.setError("User with these data already exists!")
+                                } else {
+                                    val s = SettingsLogic.state
+                                    val zodiac = getZodiacSign(user.dateOfBirth)
+                                    userDao.insertUser(
+                                        User(
+                                            firstName = user.firstName,
+                                            lastName = user.lastName,
+                                            gender = user.gender,
+                                            course = user.course,
+                                            dateOfBirth = user.dateOfBirth,
+                                            zodiacSign = zodiac,
+                                            speed = s.speed,
+                                            maxCockroaches = s.maxCockroaches,
+                                            bonusInterval = s.bonusInterval,
+                                            roundDuration = s.roundDuration
+                                        )
+                                    )
+                                    RegistrationScreenLogic.clearForm()
+                                    onUserCreated()
+                                }
+                            }
                         } else {
-                            showError = true
+                            RegistrationScreenLogic.setError("Fill all fields!")
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp, top = 25.dp, bottom = 25.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 25.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
                 ) {
-                    Text(
-                        text = "Play",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Save & Register", fontSize = 16.sp)
                 }
             }
         }

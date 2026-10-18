@@ -58,7 +58,7 @@ fun ScoresScreen(modifier: Modifier = Modifier) {
                     scope.launch { repository.clearAllScores() }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF6B6B), // красная кнопка
+                    containerColor = Color(0xFFFF6B6B),
                     contentColor = Color.White
                 )
             ) {

@@ -1,36 +1,19 @@
 package com.example.beetles_app
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,7 +21,17 @@ fun WelcomeScreen(
     modifier: Modifier = Modifier,
     onPlay: () -> Unit = {}
 ) {
-    val tabs = listOf("Sign up", "Settings", "Rules", "Authors", "Records")
+    var showCreateForm by remember { mutableStateOf(false) }
+
+    if (showCreateForm) {
+        RegistrationScreen(
+            onBack = { showCreateForm = false },
+            onUserCreated = { showCreateForm = false }
+        )
+        return
+    }
+
+    val tabs = listOf("Users", "Settings", "Rules", "Authors", "Records")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
 
@@ -65,7 +58,10 @@ fun WelcomeScreen(
             modifier = Modifier.weight(1f).fillMaxWidth()
         ) { page ->
             when (page) {
-                0 -> RegistrationScreen(onPlay = onPlay)
+                0 -> UsersListScreen(
+                    onPlay = onPlay,
+                    onCreateNew = { showCreateForm = true }
+                )
                 1 -> SettingsScreen()
                 2 -> RulesScreen()
                 3 -> AuthorsScreen()
