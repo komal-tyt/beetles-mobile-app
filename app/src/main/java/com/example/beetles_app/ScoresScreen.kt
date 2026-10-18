@@ -1,8 +1,10 @@
 package com.example.beetles_app
 
+import androidx.compose.foundation.layout.Arrangement
 import com.example.beetles_app.data.ScoreRepository
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -39,12 +42,29 @@ fun ScoresScreen(modifier: Modifier = Modifier) {
     val scores by repository.getAllScores().collectAsState(initial = emptyList())
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Records",
-            fontSize = 24.sp,
-            color = Color(0xFFFDFDFD),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Records",
+                fontSize = 24.sp,
+                color = Color(0xFFFDFDFD)
+            )
+
+            Button(
+                onClick = {
+                    scope.launch { repository.clearAllScores() }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF6B6B), // красная кнопка
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Clear All")
+            }
+        }
 
         LazyColumn {
             items(scores) { score ->

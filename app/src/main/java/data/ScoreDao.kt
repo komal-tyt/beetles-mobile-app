@@ -17,4 +17,19 @@ interface ScoreDao {
 
     @Query("DELETE FROM scores")
     suspend fun deleteAll()
+
+    @Query("""
+        SELECT * FROM scores 
+        WHERE firstName = :firstName 
+        AND (lastName = :lastName OR (:lastName = '' AND lastName = ''))
+        LIMIT 1
+    """)
+    suspend fun getByName(firstName: String, lastName: String): Score?
+
+    @Query("""
+        DELETE FROM scores 
+        WHERE firstName = :firstName 
+        AND (lastName = :lastName OR (:lastName = '' AND lastName = ''))
+    """)
+    suspend fun deleteByName(firstName: String, lastName: String)
 }

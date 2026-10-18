@@ -129,7 +129,7 @@ fun GameScreen(
             val currentSpeed = SettingsLogic.state.speed
 
             scope.launch {
-                repository.insertScore(
+                repository.saveBestScore(
                     Score(
                         firstName = firstName,
                         lastName = lastName,
