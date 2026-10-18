@@ -37,9 +37,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.beetles_app.data.AppDatabase
 import com.example.beetles_app.data.Score
-import data.AppDatabase
-import data.ScoreRepository
+import com.example.beetles_app.data.ScoreRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -124,13 +124,17 @@ fun GameScreen(
             }
             showDialog = true
 
-            val playerName = RegistrationScreenLogic.savedUser?.firstName ?: "Unknown"
+            val firstName = RegistrationScreenLogic.savedUser?.firstName ?: "Unknown"
+            val lastName = RegistrationScreenLogic.savedUser?.lastName ?: ""
+            val currentSpeed = SettingsLogic.state.speed
 
             scope.launch {
                 repository.insertScore(
                     Score(
-                        playerName = playerName,
+                        firstName = firstName,
+                        lastName = lastName,
                         score = score,
+                        speed = currentSpeed,
                         hits = hits,
                         misses = misses
                     )

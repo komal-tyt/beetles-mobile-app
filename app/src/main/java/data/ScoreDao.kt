@@ -1,4 +1,4 @@
-package data
+package com.example.beetles_app.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -14,4 +14,7 @@ interface ScoreDao {
 
     @Query("SELECT * FROM scores ORDER BY score DESC")
     fun getAllScores(): Flow<List<Score>>
+
+    @Query("DELETE FROM scores")
+    suspend fun deleteAll()
 }

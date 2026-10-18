@@ -1,12 +1,11 @@
-package data
+package com.example.beetles_app.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.beetles_app.data.Score
 
-@Database(entities = [Score::class], version = 1)
+@Database(entities = [Score::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun scoreDao(): ScoreDao
@@ -21,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "beetles_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

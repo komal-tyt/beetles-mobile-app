@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
@@ -37,15 +38,16 @@ fun WelcomeScreen(
     modifier: Modifier = Modifier,
     onPlay: () -> Unit = {}
 ) {
-    val tabs = listOf("Sign up", "Settings", "Rules", "Authors")
+    val tabs = listOf("Sign up", "Settings", "Rules", "Authors", "Records")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(
+        ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color.Transparent,
             contentColor = Color(0xFF9BB0C4),
+            edgePadding = 16.dp,
             modifier = Modifier.padding(top = 50.dp)
         ) {
             tabs.forEachIndexed { index, title ->
@@ -67,6 +69,7 @@ fun WelcomeScreen(
                 1 -> SettingsScreen()
                 2 -> RulesScreen()
                 3 -> AuthorsScreen()
+                4 -> ScoresScreen()
             }
         }
     }
