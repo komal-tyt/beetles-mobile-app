@@ -22,12 +22,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -35,6 +37,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.beetles_app.data.Score
+import data.AppDatabase
+import data.ScoreRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -94,6 +99,12 @@ fun GameScreen(
 
     val bugs = remember { mutableStateListOf<Bug>() }
 
+    val context = LocalContext.current
+    val repository = remember {
+        ScoreRepository(AppDatabase.getDatabase(context).scoreDao())
+    }
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(roundKey) {
         bugs.clear()
         timeLeft = roundDuration
@@ -112,6 +123,19 @@ fun GameScreen(
                 timeLeft -= 1
             }
             showDialog = true
+
+            val playerName = RegistrationScreenLogic.savedUser?.firstName ?: "Unknown"
+
+            scope.launch {
+                repository.insertScore(
+                    Score(
+                        playerName = playerName,
+                        score = score,
+                        hits = hits,
+                        misses = misses
+                    )
+                )
+            }
         }
 
         while (true) {
