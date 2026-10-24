@@ -117,25 +117,27 @@ fun GameScreen(
     }
     val scope = rememberCoroutineScope()
 
-    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    val gyroscope = remember { sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) }
+    var isScreamPlaying by remember { mutableStateOf(false) }
 
-    var gyroX by remember { mutableFloatStateOf(0f) }
-    var gyroY by remember { mutableFloatStateOf(0f) }
+    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    val accelerometer = remember { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
+
+    var accelX by remember { mutableFloatStateOf(0f) }
+    var accelY by remember { mutableFloatStateOf(0f) }
     var tiltModeActive by remember { mutableStateOf(false) }
 
-    DisposableEffect(gyroscope) {
+    DisposableEffect(accelerometer) {
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type == Sensor.TYPE_GYROSCOPE) {
-                    gyroX = event.values[0]
-                    gyroY = event.values[1]
+                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                    accelX = event.values[0]
+                    accelY = event.values[1]
                 }
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-        if (gyroscope != null) {
-            sensorManager.registerListener(listener, gyroscope, SensorManager.SENSOR_DELAY_GAME)
+        if (accelerometer != null) {
+            sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
         }
         onDispose {
             sensorManager.unregisterListener(listener)
@@ -213,21 +215,30 @@ fun GameScreen(
 
         while (true) {
             delay(16)
+
+            if (tiltModeActive && (abs(accelX) > 1f || abs(accelY) > 1f)) {
+                if (!isScreamPlaying) {
+                    soundPool.play(screamSoundId, 1f, 1f, 1, 0, 1f)
+                    isScreamPlaying = true
+                }
+            } else {
+                isScreamPlaying = false
+            }
+
             bugs.forEachIndexed { index, bug ->
-                var x: Float
-                var y: Float
                 var vx = bug.vx
                 var vy = bug.vy
 
                 if (tiltModeActive) {
-                    x = bug.x + gyroY * 0.02f
-                    y = bug.y + gyroX * 0.02f
-                    vx = 0f
-                    vy = 0f
-                } else {
-                    x = bug.x + bug.vx * gameSpeed
-                    y = bug.y + bug.vy * gameSpeed
+                    vx += -accelX * 0.03f
+                    vy += accelY * 0.03f
+
+                    vx = vx.coerceIn(-0.03f, 0.03f)
+                    vy = vy.coerceIn(-0.03f, 0.03f)
                 }
+
+                var x = bug.x + vx
+                var y = bug.y + vy
 
                 val half = bug.size / 2f
                 val minX = half
@@ -235,13 +246,39 @@ fun GameScreen(
                 val minY = half
                 val maxY = 1f - half
 
-                if (x < minX) { x = minX; if (!tiltModeActive) vx = abs(vx) }
-                if (x > maxX) { x = maxX; if (!tiltModeActive) vx = -abs(vx) }
-                if (y < minY) { y = minY; if (!tiltModeActive) vy = abs(vy) }
-                if (y > maxY) { y = maxY; if (!tiltModeActive) vy = -abs(vy) }
+                if (x < minX) {
+                    x = minX
+                    if (tiltModeActive) vx = 0f else vx = abs(vx)
+                }
+                if (x > maxX) {
+                    x = maxX
+                    if (tiltModeActive) vx = 0f else vx = -abs(vx)
+                }
+                if (y < minY) {
+                    y = minY
+                    if (tiltModeActive) vy = 0f else vy = abs(vy)
+                }
+                if (y > maxY) {
+                    y = maxY
+                    if (tiltModeActive) vy = 0f else vy = -abs(vy)
+                }
 
                 bugs[index] = bug.copy(x = x, y = y, vx = vx, vy = vy)
             }
+        }
+    }
+
+    LaunchedEffect(tiltModeActive) {
+        if (tiltModeActive) {
+            delay(15000L)
+            tiltModeActive = false
+        }
+
+        bugs.forEachIndexed { index, bug ->
+            bugs[index] = bug.copy(
+                vx = bug.type.defaultSpeed * (if (Random.nextBoolean()) 1f else -1f),
+                vy = bug.type.defaultSpeed * (if (Random.nextBoolean()) 1f else -1f)
+            )
         }
     }
 
@@ -293,10 +330,6 @@ fun GameScreen(
                             bonuses.remove(tappedBonus)
                             tiltModeActive = true
                             soundPool.play(screamSoundId, 1f, 1f, 1, 0, 1f)
-                            scope.launch {
-                                delay(15000)
-                                tiltModeActive = false
-                            }
                         } else if (target != null) {
                             score += target.type.score
                             hits += 1
