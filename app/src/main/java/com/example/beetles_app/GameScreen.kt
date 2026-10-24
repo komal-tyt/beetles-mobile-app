@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -99,6 +100,8 @@ fun GameScreen(
 
     val bugs = remember { mutableStateListOf<Bug>() }
 
+    val bonuses = remember { mutableStateListOf<Bonus>() }
+
     val context = LocalContext.current
     val repository = remember {
         ScoreRepository(AppDatabase.getDatabase(context).scoreDao())
@@ -107,6 +110,7 @@ fun GameScreen(
 
     LaunchedEffect(roundKey) {
         bugs.clear()
+        bonuses.clear()
         timeLeft = roundDuration
         showDialog = false
         score = 0
@@ -139,6 +143,20 @@ fun GameScreen(
                         )
                     )
                 }
+            }
+        }
+
+        launch {
+            while (true) {
+                delay(15_000L)
+                bonuses.clear()   // ← удаляем старый бонус (если не собрали)
+                bonuses.add(
+                    Bonus(
+                        id = System.currentTimeMillis(),
+                        x = Random.nextFloat(),
+                        y = Random.nextFloat()
+                    )
+                )
             }
         }
 
@@ -177,6 +195,22 @@ fun GameScreen(
                 .background(Color(0xFF25344a))
                 .pointerInput(roundKey) {
                     detectTapGestures(onTap = { offset ->
+
+                        var tappedBonus: Bonus? = null
+                        for (bonus in bonuses) {
+                            val sizePx = bonus.size * widthPx
+                            val centerX = bonus.x * widthPx
+                            val centerY = bonus.y * heightPx
+                            val radius = sizePx / 2f
+
+                            val dx = offset.x - centerX
+                            val dy = offset.y - centerY
+                            if (dx * dx + dy * dy < radius * radius) {
+                                tappedBonus = bonus
+                                break
+                            }
+                        }
+
                         var tapped: Bug? = null
 
                         for (bug in bugs) {
@@ -194,7 +228,11 @@ fun GameScreen(
                         }
 
                         val target = tapped
-                        if (target != null) {
+                        if (tappedBonus != null) {
+                            score += 10
+                            bonuses.remove(tappedBonus)
+                            // Здесь потом включим наклон
+                        } else if (target != null) {
                             score += target.type.score
                             hits += 1
                             bugs.remove(target)
@@ -229,6 +267,24 @@ fun GameScreen(
                             .size(sizePx.toDp())
                             .rotate(angle)
                     )
+                }
+            }
+
+            bonuses.forEach { bonus ->
+                val sizePx = bonus.size * widthPx
+                with(density) {
+                    Box(
+                        modifier = Modifier
+                            .offset(
+                                x = (bonus.x * widthPx - sizePx / 2f).toDp(),
+                                y = (bonus.y * heightPx - sizePx / 2f).toDp()
+                            )
+                            .size(sizePx.toDp())
+                            .background(Color(0xFFFFD700), shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("⭐", fontSize = 24.sp)
+                    }
                 }
             }
 
