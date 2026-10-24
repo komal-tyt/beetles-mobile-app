@@ -47,6 +47,15 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 import kotlin.random.Random
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.AudioAttributes
+import android.media.SoundPool
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableFloatStateOf
 
 fun randomBug(id: Long): Bug {
     val type = when (Random.nextInt(10)) {
@@ -108,6 +117,48 @@ fun GameScreen(
     }
     val scope = rememberCoroutineScope()
 
+    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    val gyroscope = remember { sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) }
+
+    var gyroX by remember { mutableFloatStateOf(0f) }
+    var gyroY by remember { mutableFloatStateOf(0f) }
+    var tiltModeActive by remember { mutableStateOf(false) }
+
+    DisposableEffect(gyroscope) {
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                if (event.sensor.type == Sensor.TYPE_GYROSCOPE) {
+                    gyroX = event.values[0]
+                    gyroY = event.values[1]
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        if (gyroscope != null) {
+            sensorManager.registerListener(listener, gyroscope, SensorManager.SENSOR_DELAY_GAME)
+        }
+        onDispose {
+            sensorManager.unregisterListener(listener)
+        }
+    }
+
+    val soundPool = remember {
+        SoundPool.Builder()
+            .setMaxStreams(1)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+    }
+    val screamSoundId = remember { soundPool.load(context, R.raw.bug_scream, 1) }
+
+    DisposableEffect(Unit) {
+        onDispose { soundPool.release() }
+    }
+
     LaunchedEffect(roundKey) {
         bugs.clear()
         bonuses.clear()
@@ -149,7 +200,7 @@ fun GameScreen(
         launch {
             while (true) {
                 delay(15_000L)
-                bonuses.clear()   // ← удаляем старый бонус (если не собрали)
+                bonuses.clear()
                 bonuses.add(
                     Bonus(
                         id = System.currentTimeMillis(),
@@ -163,10 +214,20 @@ fun GameScreen(
         while (true) {
             delay(16)
             bugs.forEachIndexed { index, bug ->
-                var x = bug.x + bug.vx * gameSpeed
-                var y = bug.y + bug.vy * gameSpeed
+                var x: Float
+                var y: Float
                 var vx = bug.vx
                 var vy = bug.vy
+
+                if (tiltModeActive) {
+                    x = bug.x + gyroY * 0.02f
+                    y = bug.y + gyroX * 0.02f
+                    vx = 0f
+                    vy = 0f
+                } else {
+                    x = bug.x + bug.vx * gameSpeed
+                    y = bug.y + bug.vy * gameSpeed
+                }
 
                 val half = bug.size / 2f
                 val minX = half
@@ -174,10 +235,10 @@ fun GameScreen(
                 val minY = half
                 val maxY = 1f - half
 
-                if (x < minX) { x = minX; vx = abs(vx) }
-                if (x > maxX) { x = maxX; vx = -abs(vx) }
-                if (y < minY) { y = minY; vy = abs(vy) }
-                if (y > maxY) { y = maxY; vy = -abs(vy) }
+                if (x < minX) { x = minX; if (!tiltModeActive) vx = abs(vx) }
+                if (x > maxX) { x = maxX; if (!tiltModeActive) vx = -abs(vx) }
+                if (y < minY) { y = minY; if (!tiltModeActive) vy = abs(vy) }
+                if (y > maxY) { y = maxY; if (!tiltModeActive) vy = -abs(vy) }
 
                 bugs[index] = bug.copy(x = x, y = y, vx = vx, vy = vy)
             }
@@ -229,9 +290,13 @@ fun GameScreen(
 
                         val target = tapped
                         if (tappedBonus != null) {
-                            score += 10
                             bonuses.remove(tappedBonus)
-                            // Здесь потом включим наклон
+                            tiltModeActive = true
+                            soundPool.play(screamSoundId, 1f, 1f, 1, 0, 1f)
+                            scope.launch {
+                                delay(15000)
+                                tiltModeActive = false
+                            }
                         } else if (target != null) {
                             score += target.type.score
                             hits += 1
@@ -273,18 +338,16 @@ fun GameScreen(
             bonuses.forEach { bonus ->
                 val sizePx = bonus.size * widthPx
                 with(density) {
-                    Box(
+                    Image(
+                        painter = painterResource(id = R.drawable.bonus),
+                        contentDescription = "Bonus",
                         modifier = Modifier
                             .offset(
                                 x = (bonus.x * widthPx - sizePx / 2f).toDp(),
                                 y = (bonus.y * heightPx - sizePx / 2f).toDp()
                             )
                             .size(sizePx.toDp())
-                            .background(Color(0xFFFFD700), shape = CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("⭐", fontSize = 24.sp)
-                    }
+                    )
                 }
             }
 
