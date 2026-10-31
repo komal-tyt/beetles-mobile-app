@@ -1,5 +1,12 @@
 package com.example.beetles_app
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.AudioAttributes
+import android.media.SoundPool
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -13,13 +20,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,15 +55,6 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 import kotlin.random.Random
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.media.AudioAttributes
-import android.media.SoundPool
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableFloatStateOf
 
 fun randomBug(id: Long): Bug {
     val type = when (Random.nextInt(10)) {
@@ -108,8 +107,9 @@ fun GameScreen(
     var misses by remember { mutableStateOf(0) }
 
     val bugs = remember { mutableStateListOf<Bug>() }
-
     val bonuses = remember { mutableStateListOf<Bonus>() }
+    var goldPrice by remember { mutableStateOf(7500f) }
+    val localContext = LocalContext.current
 
     val context = LocalContext.current
     val repository = remember {
@@ -125,6 +125,10 @@ fun GameScreen(
     var accelX by remember { mutableFloatStateOf(0f) }
     var accelY by remember { mutableFloatStateOf(0f) }
     var tiltModeActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        goldPrice = com.example.beetles_app.data.GoldApi.getGoldPrice(localContext)
+    }
 
     DisposableEffect(accelerometer) {
         val listener = object : SensorEventListener {
@@ -213,6 +217,25 @@ fun GameScreen(
             }
         }
 
+        launch {
+            while (true) {
+                delay(20_000L)
+                if (timeLeft > 0 && bugs.none { it.type == BugType.GOLD }) {
+                    bugs.add(
+                        Bug(
+                            id = System.currentTimeMillis(),
+                            x = Random.nextFloat(),
+                            y = Random.nextFloat(),
+                            vx = BugType.GOLD.defaultSpeed * (if (Random.nextBoolean()) 1f else -1f),
+                            vy = BugType.GOLD.defaultSpeed * (if (Random.nextBoolean()) 1f else -1f),
+                            size = BugType.GOLD.defaultSize,
+                            type = BugType.GOLD
+                        )
+                    )
+                }
+            }
+        }
+
         while (true) {
             delay(16)
 
@@ -232,7 +255,6 @@ fun GameScreen(
                 if (tiltModeActive) {
                     vx += -accelX * 0.03f
                     vy += accelY * 0.03f
-
                     vx = vx.coerceIn(-0.03f, 0.03f)
                     vy = vy.coerceIn(-0.03f, 0.03f)
                 }
@@ -300,7 +322,6 @@ fun GameScreen(
                             val centerX = bonus.x * widthPx
                             val centerY = bonus.y * heightPx
                             val radius = sizePx / 2f
-
                             val dx = offset.x - centerX
                             val dy = offset.y - centerY
                             if (dx * dx + dy * dy < radius * radius) {
@@ -310,13 +331,11 @@ fun GameScreen(
                         }
 
                         var tapped: Bug? = null
-
                         for (bug in bugs) {
                             val sizePx = bug.size * widthPx
                             val centerX = bug.x * widthPx
                             val centerY = bug.y * heightPx
                             val radius = sizePx / 2f
-
                             val dx = offset.x - centerX
                             val dy = offset.y - centerY
                             if (dx * dx + dy * dy < radius * radius) {
@@ -331,15 +350,21 @@ fun GameScreen(
                             tiltModeActive = true
                             soundPool.play(screamSoundId, 1f, 1f, 1, 0, 1f)
                         } else if (target != null) {
-                            score += target.type.score
+                            if (target.type == BugType.GOLD) {
+                                score += (goldPrice / 10).toInt()
+                            } else {
+                                score += target.type.score
+                            }
                             hits += 1
                             bugs.remove(target)
-                            bugs.add(
-                                randomBugAwayFromOthers(
-                                    bugs,
-                                    System.currentTimeMillis() + target.id
+                            if (target.type != BugType.GOLD) {
+                                bugs.add(
+                                    randomBugAwayFromOthers(
+                                        bugs,
+                                        System.currentTimeMillis() + target.id
+                                    )
                                 )
-                            )
+                            }
                         } else {
                             misses += 1
                         }
@@ -348,7 +373,6 @@ fun GameScreen(
         ) {
             bugs.forEach { bug ->
                 val sizePx = bug.size * widthPx
-
                 with(density) {
                     val angle = Math.toDegrees(
                         atan2(bug.vy.toDouble(), bug.vx.toDouble())

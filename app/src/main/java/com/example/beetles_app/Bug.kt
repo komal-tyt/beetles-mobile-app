@@ -29,6 +29,13 @@ enum class BugType(
         score = 10,
         color = Color(0xFF9932CC),
         imageRes = R.drawable.bug_rare
+    ),
+    GOLD(
+        defaultSpeed = 0.002f,
+        defaultSize = 0.13f,
+        score = 0,
+        color = Color(0xFFFFD700),
+        imageRes = R.drawable.bug_gold
     )
 }
 

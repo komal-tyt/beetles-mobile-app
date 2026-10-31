@@ -37,6 +37,11 @@ android {
 }
 
 dependencies {
+    dependencies {
+        dependencies {
+            implementation("androidx.core:core-ktx:1.12.0")
+        }
+    }
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

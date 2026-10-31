@@ -31,7 +31,7 @@ fun WelcomeScreen(
         return
     }
 
-    val tabs = listOf("Users", "Settings", "Rules", "Authors", "Records")
+    val tabs = listOf("Users", "Settings", "Rules", "Authors", "Records", "Gold")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
 
@@ -66,6 +66,7 @@ fun WelcomeScreen(
                 2 -> RulesScreen()
                 3 -> AuthorsScreen()
                 4 -> ScoresScreen()
+                5 -> GoldWidgetScreen()
             }
         }
     }

@@ -48,6 +48,7 @@ object RegistrationScreenLogic {
 
     fun setError(msg: String) { errorMessage = msg }
 
+    // Вызов этой функции происходит при клике на карточку в списке
     fun selectUser(user: User) {
         selectedUser = user
         SettingsLogic.updateSettings(

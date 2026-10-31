@@ -17,4 +17,4 @@ class ScoreRepository(private val scoreDao: ScoreDao) {
             scoreDao.insert(score)
         }
     }
-}
+}   
