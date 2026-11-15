@@ -51,6 +51,7 @@ import com.example.beetles_app.data.Score
 import com.example.beetles_app.data.ScoreRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
@@ -93,21 +94,23 @@ fun randomBugAwayFromOthers(existing: List<Bug>, id: Long): Bug {
 @Composable
 fun GameScreen(
     modifier: Modifier = Modifier,
-    onExit: () -> Unit = {}
+    onExit: () -> Unit = {},
+    viewModel: GameViewModel = koinViewModel()
 ) {
+    val score = viewModel.score
+    val hits = viewModel.hits
+    val misses = viewModel.misses
+    val timeLeft = viewModel.timeLeft
+
+    val bugs = remember { mutableStateListOf<Bug>() }
+    val bonuses = remember { mutableStateListOf<Bonus>() }
+    var showDialog by remember { mutableStateOf(false) }
+    var roundKey by remember { mutableStateOf(0) }
+
     val roundDuration = SettingsLogic.state.roundDuration
     val maxBeetles = SettingsLogic.state.maxCockroaches
     val gameSpeed = SettingsLogic.state.speed
 
-    var timeLeft by remember { mutableStateOf(roundDuration) }
-    var showDialog by remember { mutableStateOf(false) }
-    var roundKey by remember { mutableStateOf(0) }
-    var score by remember { mutableStateOf(0) }
-    var hits by remember { mutableStateOf(0) }
-    var misses by remember { mutableStateOf(0) }
-
-    val bugs = remember { mutableStateListOf<Bug>() }
-    val bonuses = remember { mutableStateListOf<Bonus>() }
     var goldPrice by remember { mutableStateOf(7500f) }
     val localContext = LocalContext.current
 
@@ -168,39 +171,14 @@ fun GameScreen(
     LaunchedEffect(roundKey) {
         bugs.clear()
         bonuses.clear()
-        timeLeft = roundDuration
         showDialog = false
-        score = 0
-        hits = 0
-        misses = 0
+
+        if (roundKey > 0) {
+            viewModel.restart()
+        }
 
         repeat(maxBeetles) { i ->
             bugs.add(randomBugAwayFromOthers(bugs, i.toLong() + roundKey * 1000L))
-        }
-
-        launch {
-            while (timeLeft > 0) {
-                delay(1000)
-                timeLeft -= 1
-            }
-            showDialog = true
-
-            val currentUser = RegistrationScreenLogic.selectedUser
-            if (currentUser != null) {
-                val currentSpeed = SettingsLogic.state.speed
-                scope.launch {
-                    repository.saveBestScore(
-                        Score(
-                            firstName = currentUser.firstName,
-                            lastName = currentUser.lastName,
-                            score = score,
-                            speed = currentSpeed,
-                            hits = hits,
-                            misses = misses
-                        )
-                    )
-                }
-            }
         }
 
         launch {
@@ -290,6 +268,29 @@ fun GameScreen(
         }
     }
 
+    LaunchedEffect(timeLeft) {
+        if (timeLeft <= 0) {
+            showDialog = true
+
+            val currentUser = RegistrationScreenLogic.selectedUser
+            if (currentUser != null) {
+                val currentSpeed = SettingsLogic.state.speed
+                scope.launch {
+                    repository.saveBestScore(
+                        Score(
+                            firstName = currentUser.firstName,
+                            lastName = currentUser.lastName,
+                            score = score,
+                            speed = currentSpeed,
+                            hits = hits,
+                            misses = misses
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     LaunchedEffect(tiltModeActive) {
         if (tiltModeActive) {
             delay(15000L)
@@ -347,15 +348,15 @@ fun GameScreen(
                         val target = tapped
                         if (tappedBonus != null) {
                             bonuses.remove(tappedBonus)
+                            viewModel.addScore(10)
                             tiltModeActive = true
                             soundPool.play(screamSoundId, 1f, 1f, 1, 0, 1f)
                         } else if (target != null) {
                             if (target.type == BugType.GOLD) {
-                                score += (goldPrice / 10).toInt()
+                                viewModel.addScore((goldPrice / 10).toInt())
                             } else {
-                                score += target.type.score
+                                viewModel.addScore(tapped.type.score)
                             }
-                            hits += 1
                             bugs.remove(target)
                             if (target.type != BugType.GOLD) {
                                 bugs.add(
@@ -366,7 +367,7 @@ fun GameScreen(
                                 )
                             }
                         } else {
-                            misses += 1
+                            viewModel.addMiss()
                         }
                     })
                 }
