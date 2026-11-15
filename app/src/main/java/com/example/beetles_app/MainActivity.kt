@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.beetles_app.ui.theme.Beetles_appTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,7 +30,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = Color(0xFF25344a)
                     ) {
-                        var showGame by remember { mutableStateOf(false) }
+                        var showGame by rememberSaveable  { mutableStateOf(false) }
                         if (showGame) {
                             GameScreen(onExit = { showGame = false })
                         } else {
